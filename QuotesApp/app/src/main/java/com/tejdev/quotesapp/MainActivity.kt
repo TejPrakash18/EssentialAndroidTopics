@@ -31,21 +31,22 @@ class MainActivity : AppCompatActivity() {
     private fun getQuote(){
         setInProgress(true)
         lifecycleScope.launch {
-            try {
-                val response = RetrofitInstance.quoteApi.getQuotes()
-                if (response.isSuccessful && response.body() != null) {
-                    setInProgress(false)
-                    setUI(response.body()!!)
-                } else {
-                    setInProgress(false)
-                    Toast.makeText(applicationContext, "Failed to fetch quote", Toast.LENGTH_SHORT).show()
-                }
+                try{
+                    val response = RetrofitInstance.quoteApi.getQuotes()
+                    runOnUiThread {
+                        setInProgress(false)
+                        response.body()?.first()?.let {
+                            setUI(it)
+                        }
+                    }
 
-            } catch (e: Exception) {
-                setInProgress(false)
-                Toast.makeText(applicationContext, "Something went wrong", Toast.LENGTH_SHORT).show()
+                }catch (e : Exception){
+                    runOnUiThread {
+                        setInProgress(false)
+                        Toast.makeText(applicationContext,"Something went wrong",Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
-        }
     }
 
     private fun setUI(quote: QuoteModel){
